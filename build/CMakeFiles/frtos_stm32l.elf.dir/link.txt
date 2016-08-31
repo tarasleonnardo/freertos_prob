@@ -1,1 +1,0 @@
-/usr/bin/arm-none-eabi-gcc  -std=c99 -g -O0 -Wall -mthumb -mcpu=cortex-m3 -ffunction-sections -fdata-sections -Wl,--print-memory-usage,--gc-sections,-nostdlib -T /home/user875223/prog/rtos/free-rtos/stm32l1-nucleo-free-rtos-test/ld/STM32L152XE_FLASH.ld  CMakeFiles/frtos_stm32l.elf.dir/main.c.obj CMakeFiles/frtos_stm32l.elf.dir/system_stm32l1xx.c.obj  -o frtos_stm32l.elf 
