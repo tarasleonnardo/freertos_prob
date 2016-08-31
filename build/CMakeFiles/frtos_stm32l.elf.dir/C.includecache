@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../CMSIS/CM3/CoreSupport/core_cm3.h
+stdint.h
+-
+intrinsics.h
+-
+
+../CMSIS/CM3/DeviceSupport/ST/STM32L1xx/stm32l1xx.h
+core_cm3.h
+../CMSIS/CM3/DeviceSupport/ST/STM32L1xx/core_cm3.h
+system_stm32l1xx.h
+../CMSIS/CM3/DeviceSupport/ST/STM32L1xx/system_stm32l1xx.h
+stdint.h
+-
+stm32l1xx_conf.h
+../CMSIS/CM3/DeviceSupport/ST/STM32L1xx/stm32l1xx_conf.h
+
+../CMSIS/CM3/DeviceSupport/ST/STM32L1xx/system_stm32l1xx.h
+
+/home/user875223/prog/rtos/free-rtos/stm32l1-nucleo-free-rtos-test/main.c
+
+/home/user875223/prog/rtos/free-rtos/stm32l1-nucleo-free-rtos-test/system_stm32l1xx.c
+stm32l1xx.h
+/home/user875223/prog/rtos/free-rtos/stm32l1-nucleo-free-rtos-test/stm32l1xx.h
+
