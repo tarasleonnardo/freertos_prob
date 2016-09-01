@@ -1,26 +1,31 @@
-#include "stm32l152xe.h"
+/* Standard includes. */
+#include <stdio.h>
 
+/* Kernel includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
+/* The priorities assigned to the tasks. */
+#define mainLED_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
 
-void delay(void)
+/* The LCD task uses printf() so requires more stack than most of the other
+tasks. */
+#define mainLED_TASK_STACK_SIZE			( configMINIMAL_STACK_SIZE * 2 )
+
+static void prvLEDTask( void *pvParameters );
+
+void main( void )
 {
-  uint32_t del = 0x80000;
-  
-  while(del--);
+	xTaskCreate( prvLEDTask, "LCD", mainLED_TASK_STACK_SIZE, NULL, mainLED_TASK_PRIORITY, NULL );
+
+	vTaskStartScheduler();
+
+	for( ;; );
 }
+/*-----------------------------------------------------------*/
 
-int main(void)
+static void prvLEDTask( void *pvParameters )
 {
-  RCC->AHBENR |= RCC_AHBENR_GPIOAEN_Msk;
-  GPIOA->MODER |= 1 << 10;
-  GPIOA->ODR |= 1 << 5;
-  /* Forever loop */
-  for(;;)
-  {
-    GPIOA->ODR ^= 1 << 5;
-    delay();
-  } 
-    
-    
-  return 0;
+	for(;;);
 }

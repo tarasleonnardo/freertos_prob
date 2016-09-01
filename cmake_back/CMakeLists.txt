@@ -8,7 +8,6 @@ set(TOOLCHAIN_PREF arm-none-eabi-)
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PREF}gcc)
 
 set(TOOLCHAIN_DIR "usr/arm-none-eabi/bin")
-#set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ld/link.ld")
 set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ld/STM32L152XE_FLASH.ld")
 
 set(CMAKE_SYSTEM_NAME Generic)
@@ -25,30 +24,32 @@ set(APP_NAME frtos_stm32l)
 
 set(PRJ_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-include_directories(kaa_demo_s PUBLIC
+# Include directories
+include_directories(freertos_stm32l PUBLIC
                     ${PRJ_ROOT}/CMSIS/CM3/DeviceSupport/ST
                     ${PRJ_ROOT}/CMSIS/CM3/DeviceSupport/ST/STM32L1xx
                     ${PRJ_ROOT}/CMSIS/CM3/CoreSupport
                     )
 
-#set(CMAKE_C_FLAGS "-std=c99 -g -O0 -Wall -mcpu=cortex-m3 -ffunction-sections -fdata-sections")
 set(CMAKE_C_FLAGS "-std=c99 -g -O0 -Wall -mthumb -mcpu=cortex-m3 -ffunction-sections -fdata-sections")
 message("CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS})
 
 
 set(CMAKE_C_LINK_FLAGS "-Wl,--print-memory-usage,--gc-sections,-nostdlib -T ${LINKER_SCRIPT}")
-message("CMAKE_C_LINK_FLAGS: " ${CMAKE_SHARED_LINKER_FLAGS})
+message("CMAKE_C_LINK_FLAGS: " ${CMAKE_LINK_FLAGS})
 
 set(SRC
     ${PRJ_ROOT}/main.c 
     ${PRJ_ROOT}/system_stm32l1xx.c
-#    ${PRJ_ROOT}/CMSIS/CM3/CoreSupport/core_cm3.c
-#    ${PRJ_ROOT}/CMSIS/CM3/DeviceSupport/ST/STM32L1xx/startup/arm/startup_stm32l1xx_md.s 
     ${PRJ_ROOT}/startup_stm32l1xx_md.s.txt
    )
+
+#    ${PRJ_ROOT}/CMSIS/CM3/CoreSupport/core_cm3.c
+#    ${PRJ_ROOT}/CMSIS/CM3/DeviceSupport/ST/STM32L1xx/startup/arm/startup_stm32l1xx_md.s 
+
 message("SRC: " ${SRC})
 
-add_executable(frtos_stm32l.elf ${SRC})
+add_executable(${APP_NAME}.elf ${SRC})
 
 # link_directories(${CMAKE_CURRENT_SOURCE_DIR}/ld)
 
