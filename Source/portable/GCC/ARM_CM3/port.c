@@ -158,9 +158,9 @@ void vPortSetupTimerInterrupt( void );
 /*
  * Exception handlers.
  */
-void xPortPendSVHandler( void ) __attribute__ (( naked ));
-void xPortSysTickHandler( void );
-void vPortSVCHandler( void ) __attribute__ (( naked ));
+void xPortPendSVHandler( void ) __attribute__ (( naked, used ));
+void xPortSysTickHandler( void ) __attribute__ (( used ));
+void vPortSVCHandler( void ) __attribute__ (( naked, used));
 
 /*
  * Start first task is a separate function so it can be tested in isolation.
@@ -270,7 +270,7 @@ static void prvPortStartFirstTask( void )
 	__asm volatile(
 					" ldr r0, =0xE000ED08 	\n" /* Use the NVIC offset register to locate the stack. */
 					" ldr r0, [r0] 			\n"
-					" ldr r0, [r0] 			\n"
+					" ldr r0, [r0] 			\n" /* Load stack pointer to r0 Taras comment */
 					" msr msp, r0			\n" /* Set the msp back to the start of the stack. */
 					" cpsie i				\n" /* Globally enable interrupts. */
 					" cpsie f				\n"

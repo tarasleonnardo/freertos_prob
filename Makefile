@@ -25,7 +25,7 @@ A_FLAGS:= -x assembler
 ##############################################################################
 ##############################################################################
 
-default: link_app
+default: $(APP_NAME).elf
 	echo Success.
 
 ##############################################################################
@@ -34,15 +34,18 @@ default: link_app
 
 FREERTOS_SRC_DIR := $(PRJ_ROOT_DIR)/Source
 FREERTOS_PORT_SRC_DIR := $(PRJ_ROOT_DIR)/Source/portable/GCC/ARM_CM3
+FREERTOS_MEM_MNG_SRC_DIR := $(PRJ_ROOT_DIR)/Source/portable/MemMang
 FREERTOS_BLD_DIR := $(BLD_DIR)/freertos
 FREERTOS_LIB_NAME := $(FREERTOS_BLD_DIR)/freertos.a
 
-FREERTOS_INCLUDE_DIRS:= -I$(FREERTOS_SRC_DIR) \
-               -I$(FREERTOS_SRC_DIR)/include \
-               -I$(FREERTOS_SRC_DIR)/portable/GCC/ARM_CM3
+FREERTOS_INCLUDE_DIRS:= -I$(PRJ_ROOT_DIR) \
+                        -I$(FREERTOS_SRC_DIR) \
+                        -I$(FREERTOS_SRC_DIR)/include \
+                        -I$(FREERTOS_SRC_DIR)/portable/GCC/ARM_CM3
 
 FREERTOS_SRC := $(wildcard $(FREERTOS_SRC_DIR)/*.c) 
 FREERTOS_SRC += $(wildcard $(FREERTOS_PORT_SRC_DIR)/*.c)
+FREERTOS_SRC += $(wildcard $(FREERTOS_MEM_MNG_SRC_DIR)/*.c)
 
 FREERTOS_OBJ := $(notdir $(FREERTOS_SRC:.c=.o))
 
@@ -55,8 +58,8 @@ $(FREERTOS_LIB_NAME): $(FREERTOS_SRC)
 	echo
 	echo "compilling freertos objects: $(FREERTOS_OBJ)"
 	echo
-	-mkdir $(BLD_DIR)
-	-mkdir $(FREERTOS_BLD_DIR)
+	-@mkdir $(BLD_DIR)
+	-@mkdir $(FREERTOS_BLD_DIR)
 	echo
 	cd $(FREERTOS_BLD_DIR) && \
 	$(CC) -c $(C_FLAGS) $(FREERTOS_SRC) $(FREERTOS_INCLUDE_DIRS) && \
@@ -83,23 +86,25 @@ BSP_STARTUP_O := $(BSP_BLD_DIR)/startup_stm32l1xx_md.so
 
 ##############################################################################
 
-$(BSP_LIB_NAME): $(BSP_SRC) bsp_startup
-	echo
+$(BSP_LIB_NAME): $(BSP_SRC) $(BSP_STARTUP_O) 
+	echo "Prerequisites: $(BSP_SRC) $(BSP_STARTUP)"
 	echo
 	echo "Compilling bsp objects: $(BSP_OBJ)"
 	echo
-	-mkdir $(BLD_DIR)
-	-mkdir $(BSP_BLD_DIR)A
+	@-mkdir $(BLD_DIR)
+	@-mkdir $(BSP_BLD_DIR)
 	echo
 	cd $(BSP_BLD_DIR) && \
 	$(CC) -c $(C_FLAGS) $(BSP_SRC) $(BSP_INCLUDE_DIRS) && \
 	echo "Archiving $(BSP_LIB_NAME)" && \
 	$(AR) rcs $(BSP_LIB_NAME) $(BSP_OBJ) $(BSP_STARTUP_O)
 
-bsp_startup: $(BSP_STARTUP)
+$(BSP_STARTUP_O): $(BSP_STARTUP)
+	echo
+	echo
 	echo "Compilling the startup file"
-	-mkdir $(BLD_DIR)
-	-mkdir $(BSP_BLD_DIR)
+	@-mkdir $(BLD_DIR)
+	@-mkdir $(BSP_BLD_DIR)
 	echo
 	$(AS) -c -g $(A_FLAGS) -o $(BSP_STARTUP_O) $(BSP_STARTUP)
 
@@ -126,8 +131,8 @@ $(APP_LIB_NAME): $(APP_LIB_SRC)
 	echo
 	echo "Compilling application files: $(APP_LIB_SRC)"
 	echo
-	-mkdir $(BLD_DIR)
-	-mkdir $(APP_LIB_BLD_DIR)
+	-@mkdir $(BLD_DIR)
+	-@mkdir $(APP_LIB_BLD_DIR)
 	echo
 	cd $(APP_LIB_BLD_DIR) && \
 	$(CC) -c $(C_FLAGS) $(APP_LIB_SRC) $(APP_LIB_INCLUDE_DIRS) && \
@@ -137,12 +142,17 @@ $(APP_LIB_NAME): $(APP_LIB_SRC)
 ### Build the application lib ###
 ##############################################################################
 ##############################################################################
+LINK_LIBRARIES := -l:$(notdir $(FREERTOS_LIB_NAME)) -l:$(notdir $(BSP_LIB_NAME)) -l:$(notdir $(APP_LIB_NAME))
+LINK_PATHES := -L $(dir $(FREERTOS_LIB_NAME)) -L $(dir $(BSP_LIB_NAME)) -L $(dir $(APP_LIB_NAME))
 
-link_app: $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) $(APP_LIB_NAME)
+APP_HEADERS := $(wildcard $(APP_LIB_INCLUDE_DIRS)/*.h)
+
+$(APP_NAME).elf: $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) $(APP_LIB_NAME) $(APP_HEADERS)
 	echo Linking the application
-	-mkdir $(BLD_DIR)
+	-@mkdir $(BLD_DIR)
 	cd $(BLD_DIR) && \
-	$(LD) -Wl,$(L_FLAGS) -T $(LD_SCRIPT) -o $(APP_NAME).elf $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) $(APP_LIB_NAME) && \
+#	$(LD) -Wl,$(L_FLAGS) -T $(LD_SCRIPT) -o $(APP_NAME).elf $(LINK_PATHES) $(LINK_LIBRARIES) && \
+	$(LD) -Wl,$(L_FLAGS) -T $(LD_SCRIPT) -o $(APP_NAME).elf -Wl,--start-group $(APP_LIB_NAME) $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) -lc -Wl,--end-group && \
 	echo Creating $(APP_NAME).hex && \
 	$(OBJCOPY) -O ihex $(APP_NAME).elf $(APP_NAME).hex
 
