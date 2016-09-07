@@ -20,6 +20,7 @@ OBJCOPY=$(TOOLCHAIN_PREF)objcopy
 C_FLAGS:= -g -Wall -mthumb -mcpu=cortex-m3 -ffunction-sections -fdata-sections
 L_FLAGS:= --gc-sections,--print-output-format,--print-memory-usage
 LD_SCRIPT:= $(PRJ_ROOT_DIR)/ld/STM32L152XE_FLASH.ld
+LD_LIB_PATH := /usr/arm-none-eabi/lib/thumb
 A_FLAGS:= -x assembler
 
 ##############################################################################
@@ -151,8 +152,7 @@ $(APP_NAME).elf: $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) $(APP_LIB_NAME) $(APP_HEAD
 	echo Linking the application
 	-@mkdir $(BLD_DIR)
 	cd $(BLD_DIR) && \
-#	$(LD) -Wl,$(L_FLAGS) -T $(LD_SCRIPT) -o $(APP_NAME).elf $(LINK_PATHES) $(LINK_LIBRARIES) && \
-	$(LD) -Wl,$(L_FLAGS) -T $(LD_SCRIPT) -o $(APP_NAME).elf -Wl,--start-group $(APP_LIB_NAME) $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) -lc -Wl,--end-group && \
+	$(LD) -Wl,$(L_FLAGS) -T $(LD_SCRIPT) -o $(APP_NAME).elf -Wl,--start-group $(APP_LIB_NAME) $(FREERTOS_LIB_NAME) $(BSP_LIB_NAME) -lc -Wl,--end-group -L $(LD_LIB_PATH) && \
 	echo Creating $(APP_NAME).hex && \
 	$(OBJCOPY) -O ihex $(APP_NAME).elf $(APP_NAME).hex
 
